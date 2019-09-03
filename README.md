@@ -2,7 +2,7 @@
 
 This repository contains a named entity recognition system for Finnish language.
 
-# Requirements:
+#2 Requirements:
 1. pytorch
 2. pytorch-crf
 3. gensim
