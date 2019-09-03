@@ -1,0 +1,58 @@
+Train and segment commands:
+
+morfessor -t vocab/whole_vocab.txt -d ones -R 0.3 -w 0.01 -s morfessor.bin
+morfessor-segment -l morfessor.bin vocab/whole_vocab.txt > segmented/whole_vocab_segmented.txt
+
+
+******************************* PARAMS *******************************
+
+-d log
+INFO:morfessor.baseline:Epochs: 7       Cost: 1551664.4051545395
+
+-d ones
+INFO:morfessor.baseline:Epochs: 6       Cost: 1148662.9976392996
+
+-d none
+INFO:morfessor.baseline:Epochs: 5       Cost: 2682755.969951184
+
+------------------------------------------------------------------------------
+
+-d ones -R 0.5
+INFO:morfessor.baseline:Epochs: 7       Cost: 1151386.2002927207
+
+-d ones -R 0.3
+INFO:morfessor.baseline:Epochs: 7       Cost: 1154713.743070193
+
+-d ones -R 0.7
+INFO:morfessor.baseline:Epochs: 6       Cost: 1149316.761234632
+
+-d ones -R 0.8
+INFO:morfessor.baseline:Epochs: 6       Cost: 1148446.9045492443
+
+-d ones -R 0.9
+INFO:morfessor.baseline:Epochs: 6       Cost: 1147509.1272290507
+
+-d ones -R 1
+INFO:morfessor.baseline:Epochs: 6       Cost: 1147448.8046366817
+
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+
+-d ones -R 0.3 -w 0.5
+INFO:morfessor.baseline:Epochs: 6       Cost: 629802.5375418359
+
+-d ones -R 0.3 -w 0.3
+INFO:morfessor.baseline:Epochs: 5       Cost: 400794.7566031601
+
+-d ones -R 0.3 -w 0.1
+INFO:morfessor.baseline:Epochs: 3       Cost: 148538.43537542463
+
+
+
+------------------------------------------------------------------------------
+
+Final:
+
+morfessor -t vocab/preprocessed_finnish_vocab.txt -d ones -w 0.05 --encoding='utf-8' -s morfessor.bin
+morfessor-segment -l morfessor.bin vocab/whole_vocab.txt > segmented/whole_vocab_segmented.txt

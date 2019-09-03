@@ -1,0 +1,33 @@
+Train and segment commands:
+
+morfessor -t vocab/preprocessed_finnish_vocab.txt -d ones -w 0.01 --encoding='utf-8' -s model/morfessor_0.01.bin
+micro avg precision: 0.7873    micro avg recall: 0.8064    avg f1: 0.7968
+
+
+morfessor -t vocab/preprocessed_finnish_vocab.txt -d ones -w 0.001 --encoding='utf-8' -s model/morfessor_0.001.bin
+micro avg precision: 0.7916    micro avg recall: 0.7811    avg f1: 0.7863
+
+
+morfessor -t vocab/preprocessed_finnish_vocab.txt -d ones -w 0.005 --encoding='utf-8' -s model/morfessor_0.005.bin
+micro avg precision: 0.7706    micro avg recall: 0.8073    avg f1: 0.7885
+
+
+morfessor -t vocab/preprocessed_finnish_vocab.txt -d ones -w 0.1 --encoding='utf-8' -s model/morfessor_0.1.bin
+micro avg precision: 0.7853    micro avg recall: 0.8145    avg f1: 0.7997
+
+
+morfessor -t vocab/preprocessed_finnish_vocab.txt -d ones -w 0.05 --encoding='utf-8' -s model/morfessor_0.05.bin
+micro avg precision: 0.7819    micro avg recall: 0.8086    avg f1: 0.7951
+
+
+morfessor -t vocab/preprocessed_finnish_vocab.txt -d ones -w 0.5 --encoding='utf-8' -s model/morfessor_0.5.bin
+micro avg precision: 0.8039    micro avg recall: 0.7900    avg f1: 0.7969
+
+
+
+Final:
+
+morfessor -t vocab/preprocessed_finnish_vocab.txt -d ones -w 0.1 --encoding='utf-8' -S model/model_0.1.txt
+morfessor-segment -l model/morfessor_0.1.bin vocab/whole_vocab.txt > segmented/whole_vocab_segmented.txt
+flatcat-train model_0.1.txt -p 100 -w 0.1 -s flatcat_0.1.txt --save-parameters parameters.txt --category-separator ࠾
+flatcat-segment model_0.1.txt --load-parameters parameters.txt --remove-nonmorphemes --category-separator ࠾ -o segmented/whole_vocab_segmented.txt vocab/whole_vocab.txt
