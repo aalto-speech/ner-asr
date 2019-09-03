@@ -12,7 +12,7 @@ The finer-data can be downloaded from here: https://github.com/mpsilfve/finer-da
 
 Once downloaded, the data needs to be placed in `data/digitoday` directory
 
-The pretrained word embeddings can be downloaded from the following links: http://bionlp-www.utu.fi/fin-vector-space-models/fin-word2vec.bin .
+The pretrained word embeddings can be downloaded from the following links: http://bionlp-www.utu.fi/fin-vector-space-models/fin-word2vec.bin and https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.fi.300.bin.gz .
 
 The first link is for the word2vec embeddings and the second one for the fastText embeddings.
 
