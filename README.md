@@ -2,12 +2,12 @@
 
 This repository contains a named entity recognition system for Finnish language.
 
-# Requirements:
+# Requirements
 1. pytorch
 2. pytorch-crf
 3. gensim
 
-# Download resources:
+# Download resources
 The finer-data can be downloaded from here: https://github.com/mpsilfve/finer-data/tree/master/data .
 
 Once downloaded, the data needs to be placed in `data/digitoday` directory
@@ -18,7 +18,7 @@ The first link is for the word2vec embeddings and the second one for the fastTex
 
 You need to place the embeddings in the `data/embeddings` directory.
 
-# Usage:
+# Usage
 Right now I am only using the embeddings of the words that are contained in dataset and drop the rest of the embeddings, therefore I create an embedding matrix containing only the vectors that we need.
 
 The matrix can be created with the following script: `utils/create_embedding_matrix.py` .
