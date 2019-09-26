@@ -1,5 +1,3 @@
-# coding: utf-8
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -11,11 +9,14 @@ from model import NERModel
 from train import train
 import utils.evaluate as evaluate
 import utils.prepare_data as prepare_data
+from utils import radam
 from config.params import *
 
 
 if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+    torch.manual_seed(0)
 
     print(device)
 
@@ -26,10 +27,6 @@ if __name__ == '__main__':
     wiki_data_path = 'data/digitoday/wikipedia.test.txt'
 
     whole_data_morph_path = 'utils/subword_segmentation/output/segmented/whole_vocab_segmented.txt'
-    # train_data_morph_path = 'utils/subword_segmentation/output/segmented/train_vocab_segmented.txt'
-    # dev_data_morph_path = 'utils/subword_segmentation/output/segmented/dev_vocab_segmented.txt'
-    # test_data_morph_path = 'utils/subword_segmentation/output/segmented/test_vocab_segmented.txt'
-    # wiki_data_morph_path = 'utils/subword_segmentation/output/segmented/wiki_vocab_segmented.txt'
 
     whole_data = prepare_data.load_data(whole_data_path)
     train_data = prepare_data.load_data(train_data_path)
@@ -48,13 +45,6 @@ if __name__ == '__main__':
     test_data = prepare_data.add_start_end_sentence_tokens(test_data)
     wiki_data = prepare_data.add_start_end_sentence_tokens(wiki_data)
 
-
-    # add <s> and </s> token to each word
-    # whole_data = prepare_data.add_start_end_word_tokens(whole_data)
-    # train_data = prepare_data.add_start_end_word_tokens(train_data)
-    # dev_data = prepare_data.add_start_end_word_tokens(dev_data)
-    # test_data = prepare_data.add_start_end_word_tokens(test_data)
-    # wiki_data = prepare_data.add_start_end_word_tokens(wiki_data)
 
     weights_matrix = np.load('weights/embedding_weights_matrix_ft.npy')
     
@@ -112,11 +102,12 @@ if __name__ == '__main__':
     # initialize the model
     model = NERModel(word_embedding_dim, char_embedding_dim, morph_embedding_dim, word_hidden_size, char_hidden_size, morph_hidden_size, len(word2idx), 
                 len(char2idx), len(morph2idx), len(tag2idx)+1, word_num_layers, char_num_layers, morph_num_layers, weights_matrix, dropout_prob).to(device)
-
     model.train()
 
     criterion = nn.NLLLoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+
+    optimizer = radam.RAdam(model.parameters(), lr=learning_rate) 
+    # optimizer = optim.Adam(model.parameters(), lr=learning_rate, amsgrad=True)
     print(model)
     
     total_trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -124,95 +115,33 @@ if __name__ == '__main__':
 
 
 
-# train the model
-if skip_training == False:
-    train(
-        model, 
-        word_num_layers, 
-        char_num_layers, 
-        morph_num_layers, 
-        num_epochs, 
-        pairs_batch_train, 
-        pairs_batch_dev, 
-        word_hidden_size, 
-        char_hidden_size, 
-        morph_hidden_size, 
-        batch_size, 
-        criterion, 
-        optimizer, 
-        patience, 
-        device
-    )
-else:
-    model = NERModel(
-                word_embedding_dim, 
-                char_embedding_dim, 
-                morph_embedding_dim, 
-                word_hidden_size, 
-                char_hidden_size, 
-                morph_hidden_size, 
-                len(word2idx), 
-                len(char2idx), 
-                len(morph2idx), 
-                len(tag2idx)+1, 
-                word_num_layers, 
-                char_num_layers, 
-                morph_num_layers,
-                weights_matrix, 
-                dropout_prob
-                ).to(device)
+    # train the model
+    if skip_training == False:
+        train(model, word_num_layers, char_num_layers, morph_num_layers, num_epochs, pairs_batch_train, pairs_batch_dev, word_hidden_size, 
+            char_hidden_size, morph_hidden_size, batch_size, criterion, optimizer, patience, device)
+        model.load_state_dict(torch.load('weights/model.pt'))
+    else:
+        model.load_state_dict(torch.load('weights/model.pt'))
 
-    model.load_state_dict(torch.load('weights/model.pt'))
+    model.eval()
 
-model.eval()
-batch_size = 1
+    batch_size = 1
 
-print('\nVALIDATION DATA \n')
-all_predicted, all_true = evaluate.get_predictions(
-                                                data_dev, 
-                                                model, 
-                                                word_num_layers, 
-                                                char_num_layers, 
-                                                morph_num_layers, 
-                                                word_hidden_size, 
-                                                char_hidden_size, 
-                                                morph_hidden_size, 
-                                                batch_size, 
-                                                device
-                                                )
+    print('\nVALIDATION DATA \n')
+    all_predicted, all_true = evaluate.get_predictions(data_dev, model, word_num_layers, char_num_layers, morph_num_layers, word_hidden_size, 
+                                                        char_hidden_size, morph_hidden_size, batch_size, device)
+    evaluate.print_scores(all_predicted, all_true, tag2idx)
+    # evaluate.evaluate_sentence(2, word_num_layers, char_num_layers, morph_num_layers, word_hidden_size, char_hidden_size, morph_hidden_size, batch_size, data_dev, model, idx2word, idx2tag, device)
 
-evaluate.print_scores(all_predicted, all_true, tag2idx)
-# evaluate.evaluate_sentence(2, word_num_layers, char_num_layers, morph_num_layers, word_hidden_size, char_hidden_size, morph_hidden_size, batch_size, data_dev, model, idx2word, idx2tag, device)
+    print('\nTEST DATA \n')
 
-print('\nTEST DATA \n')
+    all_predicted, all_true = evaluate.get_predictions(data_test, model, word_num_layers, char_num_layers, morph_num_layers, word_hidden_size, 
+                                                        char_hidden_size, morph_hidden_size, batch_size, device)
+    evaluate.print_scores(all_predicted, all_true, tag2idx)
+    # evaluate.evaluate_sentence(1, word_num_layers, char_num_layers, morph_num_layers, word_hidden_size, char_hidden_size, morph_hidden_size, batch_size, data_test, model, idx2word, idx2tag, device)
 
-all_predicted, all_true = evaluate.get_predictions(
-                                                data_test, 
-                                                model, 
-                                                word_num_layers, 
-                                                char_num_layers, 
-                                                morph_num_layers, 
-                                                word_hidden_size, 
-                                                char_hidden_size, 
-                                                morph_hidden_size, 
-                                                batch_size, 
-                                                device
-                                                )
-evaluate.print_scores(all_predicted, all_true, tag2idx)
-# evaluate.evaluate_sentence(2, word_num_layers, char_num_layers, morph_num_layers, word_hidden_size, char_hidden_size, morph_hidden_size, batch_size, data_test, model, idx2word, idx2tag, device)
+    print('\nWIKI DATA \n')
 
-print('\nWIKI DATA \n')
-
-all_predicted, all_true = evaluate.get_predictions(
-                                                data_wiki, 
-                                                model, 
-                                                word_num_layers, 
-                                                char_num_layers, 
-                                                morph_num_layers, 
-                                                word_hidden_size, 
-                                                char_hidden_size, 
-                                                morph_hidden_size, 
-                                                batch_size, 
-                                                device
-                                                )
-evaluate.print_scores(all_predicted, all_true, tag2idx)
+    all_predicted, all_true = evaluate.get_predictions(data_wiki, model, word_num_layers, char_num_layers, morph_num_layers, word_hidden_size, 
+                                                        char_hidden_size, morph_hidden_size, batch_size, device)
+    evaluate.print_scores(all_predicted, all_true, tag2idx)

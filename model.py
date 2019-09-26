@@ -38,7 +38,7 @@ class NERModel(nn.Module):
         self.word_embeddings.weight.requires_grad=False
         
         self.dropout = nn.Dropout(p=dropout_prob)
-        self.dropout_highway = nn.Dropout(p=0.5)
+        self.dropout_highway = nn.Dropout(p=0.7)
 
         self.lstm_char = nn.LSTM(self.char_embedding_dim, 
                                  self.char_hidden_size,
@@ -59,7 +59,7 @@ class NERModel(nn.Module):
                                  bidirectional=True)
 
 
-        self.highway = Highway(self.word_hidden_size*2 + self.char_hidden_size*2 + self.morph_hidden_size*2, 2, f=torch.nn.functional.relu)
+        self.highway = Highway(self.word_hidden_size*2 + self.char_hidden_size*2 + self.morph_hidden_size*2, 4, f=torch.nn.functional.relu)
     
         self.hidden2tag = nn.Linear(self.word_hidden_size*2 + self.char_hidden_size*2 + self.morph_hidden_size*2, self.tagset_size) 
 
