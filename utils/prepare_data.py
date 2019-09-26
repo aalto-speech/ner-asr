@@ -34,6 +34,27 @@ def load_data_morphs(data_path):
     return morphs
 
 
+def load_whole_data(train_path, dev_path, test_path, wiki_path):
+    data = []
+    word = []
+    tag = []
+
+    data_sources = [train_path, dev_path, test_path, wiki_path]
+    for source in data_sources:
+        with open(source, 'r') as f:
+            lines = f.readlines()
+            for line in lines:
+                if line != '\n':
+                    word.append(line.split('\t')[0])
+                    tag.append(line.split('\t')[1])
+                else:
+                    data.append((word, tag))
+                    word = []
+                    tag = []
+
+    return data
+
+
 def word_to_morph(data_morphs):
     word2morph = {}
     word2morph['<start>'] = '<start>'
@@ -194,15 +215,7 @@ def add_start_end_sentence_tokens(data):
     return data
 
 
-# add <s> and </s> tokens wo words
-def add_start_end_word_tokens(data):
-    for sent in range(len(data)):
-        for word in range(len(data[sent][0])):
-            data[sent][0][word] = '<s>' + data[sent][0][word] + '</s>'
-    return data
-
-
-# add subword boundaries, example: liiketoiminta+ +liiketoiminta+ +yksikkö
+# add subword boundaries, example: liiketoiminta+ +yksikkö
 def add_subword_boundaries(subwords):
     res = ''
     if len(subwords) == 1:

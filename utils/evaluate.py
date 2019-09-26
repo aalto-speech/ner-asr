@@ -6,13 +6,12 @@ import utils.prepare_data as prepare_data
 def get_predictions(data, model, word_num_layers, char_num_layers, morph_num_layers, word_hidden_size, char_hidden_size, morph_hidden_size, batch_size, device):
     all_true = []
     predicted_tags = []
-    
     for sent in range(len(data)):
         sentence = data[sent][0].to(device)
         tags = data[sent][1]
         chars = data[sent][2]
         morphs = data[sent][3]
-              
+        
         pad_char_seqs = prepare_data.pad_subwords(chars).to(device)
         pad_morph_seqs = prepare_data.pad_subwords(morphs).to(device)
 
