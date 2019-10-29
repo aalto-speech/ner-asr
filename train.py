@@ -2,7 +2,7 @@ import torch
 from utils.early_stopping import EarlyStopping
 
 
-def train(model, word_num_layers, char_num_layers, morph_num_layers, num_epochs, pairs_batch_train, pairs_batch_dev, word_hidden_size, char_hidden_size, morph_hidden_size, batch_size, criterion, optimizer, patience, device):
+def train(model, word_num_layers, char_num_layers, morph_num_layers, num_epochs, pairs_batch_train, pairs_batch_dev, word_hidden_size, char_hidden_size, morph_hidden_size, batch_size, optimizer, patience, device):
 
     early_stopping = EarlyStopping(patience=patience, verbose=False, delta=0)
 
@@ -20,7 +20,7 @@ def train(model, word_num_layers, char_num_layers, morph_num_layers, num_epochs,
             
             emissions = model(pad_input_seqs, input_seq_lengths, pad_char_seqs, char_seq_lengths, pad_morph_seqs, morph_seq_lengths, word_hidden, 
                                 char_hidden, morph_hidden, batch_size)
-            
+
             pad_target_seqs = pad_target_seqs.squeeze()
             
             mask = pad_target_seqs.clone()
@@ -46,6 +46,7 @@ def train(model, word_num_layers, char_num_layers, morph_num_layers, num_epochs,
                 
                 emissions = model(pad_input_seqs, input_seq_lengths, pad_char_seqs, char_seq_lengths, pad_morph_seqs, morph_seq_lengths, word_hidden, 
                                 char_hidden, morph_hidden, batch_size)
+
                                         
                 pad_target_seqs = pad_target_seqs.squeeze()
                 
@@ -56,11 +57,12 @@ def train(model, word_num_layers, char_num_layers, morph_num_layers, num_epochs,
                 loss = -model.crf(emissions, pad_target_seqs, mask=mask)
                 val_loss += loss
 
+
         # early_stopping(val_loss/len(pairs_batch_dev), model)
     
         # if early_stopping.early_stop:
-        #     print("Early stopping")
-        #     break
+            # print("Early stopping")
+            # break
         
         # if epoch % 5 == 0:
         print('[Epoch: %d] train_loss: %.4f    val_loss: %.4f' % (epoch+1, train_loss/len(pairs_batch_train), val_loss/len(pairs_batch_dev)))
