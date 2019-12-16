@@ -20,7 +20,8 @@ if __name__ == '__main__':
 
     print(device)
 
-    whole_data_path = 'data/digitoday/digitoday.2014.txt'
+    corpus_path = 'data/corpus.txt'
+    # whole_data_path = 'data/digitoday/digitoday.2014.txt'
     train_data_path = 'data/digitoday/digitoday.2014.train.txt'
     dev_data_path = 'data/digitoday/digitoday.2014.dev.txt'
     test_data_path = 'data/digitoday/digitoday.2015.test.txt'
@@ -28,7 +29,7 @@ if __name__ == '__main__':
 
     whole_data_morph_path = 'utils/subword_segmentation/output/segmented/whole_vocab_segmented.txt'
 
-    whole_data = prepare_data.load_data(whole_data_path)
+    # whole_data = prepare_data.load_data(whole_data_path)
     train_data = prepare_data.load_data(train_data_path)
     dev_data = prepare_data.load_data(dev_data_path)
     test_data = prepare_data.load_data(test_data_path)
@@ -39,7 +40,6 @@ if __name__ == '__main__':
     
 
     # add <start> and <end> token to each sentence
-    whole_data = prepare_data.add_start_end_sentence_tokens(whole_data)
     train_data = prepare_data.add_start_end_sentence_tokens(train_data)
     dev_data = prepare_data.add_start_end_sentence_tokens(dev_data)
     test_data = prepare_data.add_start_end_sentence_tokens(test_data)
@@ -48,11 +48,33 @@ if __name__ == '__main__':
 
     weights_matrix = np.load('weights/embedding_weights_matrix_ft.npy')
     
-    word2idx, idx2word, tag2idx, idx2tag, char2idx, idx2char = prepare_data.encode_data(whole_data)
-    morph2idx, idx2morph = prepare_data.encode_data_morphs(whole_data_morphs)
-    word2morph = prepare_data.word_to_morph(whole_data_morphs)
 
-    matrix_len = len(word2idx) + 1
+    # CREATE INDICES
+    # word2idx, idx2word, tag2idx, idx2tag, char2idx, idx2char = prepare_data.encode_data(corpus_path)
+    # morph2idx, idx2morph = prepare_data.encode_data_morphs(whole_data_morphs)
+    # word2morph = prepare_data.word_to_morph(whole_data_morphs)
+
+
+    # # SAVE INDICES
+    # prepare_data.save_obj(word2idx, 'weights/indices/word2idx')
+    # prepare_data.save_obj(idx2word, 'weights/indices/idx2word')
+    # prepare_data.save_obj(tag2idx, 'weights/indices/tag2idx')
+    # prepare_data.save_obj(idx2tag, 'weights/indices/idx2tag')
+    # prepare_data.save_obj(char2idx, 'weights/indices/char2idx')
+    # prepare_data.save_obj(morph2idx, 'weights/indices/morph2idx')
+    # prepare_data.save_obj(idx2morph, 'weights/indices/idx2morph')
+    # prepare_data.save_obj(word2morph, 'weights/indices/word2morph')
+
+    # LOAD INDICES
+    word2idx = prepare_data.load_obj('weights/indices/word2idx')
+    idx2word = prepare_data.load_obj('weights/indices/idx2word')
+    tag2idx = prepare_data.load_obj('weights/indices/tag2idx')
+    idx2tag = prepare_data.load_obj('weights/indices/idx2tag')
+    char2idx = prepare_data.load_obj('weights/indices/char2idx')
+    morph2idx = prepare_data.load_obj('weights/indices/morph2idx')
+    idx2morph = prepare_data.load_obj('weights/indices/idx2morph')
+    word2morph = prepare_data.load_obj('weights/indices/word2morph')
+
 
     indexed_data_train = prepare_data.data_to_idx(train_data, word2idx)
     indexed_tag_train = prepare_data.tag_to_idx(train_data, tag2idx)
@@ -104,8 +126,6 @@ if __name__ == '__main__':
                 len(char2idx), len(morph2idx), len(tag2idx)+1, word_num_layers, char_num_layers, morph_num_layers, weights_matrix, dropout_prob).to(device)
     model.train()
 
-    criterion = nn.NLLLoss()
-
     optimizer = radam.RAdam(model.parameters(), lr=learning_rate) 
     # optimizer = optim.Adam(model.parameters(), lr=learning_rate, amsgrad=True)
     print(model)
@@ -118,7 +138,7 @@ if __name__ == '__main__':
     # train the model
     if skip_training == False:
         train(model, word_num_layers, char_num_layers, morph_num_layers, num_epochs, pairs_batch_train, pairs_batch_dev, word_hidden_size, 
-            char_hidden_size, morph_hidden_size, batch_size, criterion, optimizer, patience, device)
+            char_hidden_size, morph_hidden_size, batch_size, optimizer, patience, device)
         model.load_state_dict(torch.load('weights/model.pt'))
     else:
         model.load_state_dict(torch.load('weights/model.pt'))
@@ -126,6 +146,7 @@ if __name__ == '__main__':
     model.eval()
 
     batch_size = 1
+    
 
     print('\nVALIDATION DATA \n')
     all_predicted, all_true = evaluate.get_predictions(data_dev, model, word_num_layers, char_num_layers, morph_num_layers, word_hidden_size, 
@@ -133,15 +154,15 @@ if __name__ == '__main__':
     evaluate.print_scores(all_predicted, all_true, tag2idx)
     # evaluate.evaluate_sentence(2, word_num_layers, char_num_layers, morph_num_layers, word_hidden_size, char_hidden_size, morph_hidden_size, batch_size, data_dev, model, idx2word, idx2tag, device)
 
-    print('\nTEST DATA \n')
 
+    print('\nTEST DATA \n')
     all_predicted, all_true = evaluate.get_predictions(data_test, model, word_num_layers, char_num_layers, morph_num_layers, word_hidden_size, 
                                                         char_hidden_size, morph_hidden_size, batch_size, device)
     evaluate.print_scores(all_predicted, all_true, tag2idx)
     # evaluate.evaluate_sentence(1, word_num_layers, char_num_layers, morph_num_layers, word_hidden_size, char_hidden_size, morph_hidden_size, batch_size, data_test, model, idx2word, idx2tag, device)
 
-    print('\nWIKI DATA \n')
 
+    print('\nWIKI DATA \n')
     all_predicted, all_true = evaluate.get_predictions(data_wiki, model, word_num_layers, char_num_layers, morph_num_layers, word_hidden_size, 
                                                         char_hidden_size, morph_hidden_size, batch_size, device)
     evaluate.print_scores(all_predicted, all_true, tag2idx)

@@ -2,7 +2,7 @@ import torch
 from utils.early_stopping import EarlyStopping
 
 
-def train(model, word_num_layers, char_num_layers, morph_num_layers, num_epochs, pairs_batch_train, pairs_batch_dev, word_hidden_size, char_hidden_size, morph_hidden_size, batch_size, criterion, optimizer, patience, device):
+def train(model, word_num_layers, char_num_layers, morph_num_layers, num_epochs, pairs_batch_train, pairs_batch_dev, word_hidden_size, char_hidden_size, morph_hidden_size, batch_size, optimizer, patience, device):
 
     early_stopping = EarlyStopping(patience=patience, verbose=False, delta=0)
 
