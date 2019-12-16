@@ -11,9 +11,10 @@ morph_hidden_size = 75
 morph_num_layers = 2
 
 batch_size = 128
-num_epochs = 47
+num_epochs = 61
 dropout_prob = 0.5
 learning_rate = 0.001
 patience = 10
-MAX_SEQ_LENGTH = 100
-skip_training = False
+MAX_SEQ_LENGTH = 150
+skip_training = True
+full_asr_evaluation = True
