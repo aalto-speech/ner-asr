@@ -6,26 +6,20 @@ This repository contains a named entity recognition system for Finnish language.
 1. pytorch
 2. pytorch-crf
 3. gensim
+4. morfessor
 
 # Download resources
-The finer-data can be downloaded from here: https://github.com/mpsilfve/finer-data/tree/master/data .
-
-Once downloaded, the data needs to be placed in `data/digitoday` directory
-
-The pretrained word embeddings can be downloaded from the following links: http://bionlp-www.utu.fi/fin-vector-space-models/fin-word2vec.bin and https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.fi.300.bin.gz .
-
-The first link is for the word2vec embeddings and the second one for the fastText embeddings.
+The pretrained word embeddings can be downloaded from the following link: https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.fi.300.bin.gz .
 
 You need to place the embeddings in the `data/embeddings` directory.
 
+You can download the model weights from the following link: https://drive.google.com/open?id=1eSfSh6Ch8P96bTde5-uSechayfx4oECV
+
+The weights should be placed in a `weights` directory
+
 # Usage
-Right now I am only using the embeddings of the words that are contained in dataset and drop the rest of the embeddings, therefore I create an embedding matrix containing only the vectors that we need.
+In order to evaluate the system on the Digitoday dataset, run `main_digitoday.py` script.
 
-The matrix can be created with the following script: `utils/create_embedding_matrix.py` .
+In order to evaluate the system on the Parliament dataset, run `main_parliament.py` script. If you want to evaluate it only on the entities that were found by Lingsoft, set the parameter `full_asr_evaluation` to `False` in the `config/config.py` file.
 
-Once the matrix is saved, place it in the `wights` directory.
-
-In the `config` directory you can find the parameters used for training the model. You can adjust those before trainig.
-
-Inorder to train and evaluate the model you need to run the `main.py` script.
-The model weights will be saved in the `weights` directory.
+In order to evaluate the system on the Pressiklubi dataset, run `main_pressiklubi.py` script. If you want to evaluate it only on the entities that were found by Lingsoft, set the parameter `full_asr_evaluation` to `False` in the `config/config.py` file.
