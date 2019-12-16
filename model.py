@@ -60,8 +60,8 @@ class NERModel(nn.Module):
 
 
         self.highway = Highway(self.word_hidden_size*2 + self.char_hidden_size*2 + self.morph_hidden_size*2, 4, f=torch.nn.functional.relu)
-    
-        self.hidden2tag = nn.Linear(self.word_hidden_size*2 + self.char_hidden_size*2 + self.morph_hidden_size*2, self.tagset_size) 
+        self.hidden2tag = nn.Linear(self.word_hidden_size*2 + self.char_hidden_size*2 + self.morph_hidden_size*2, self.tagset_size)
+
 
         self.crf = CRF(self.tagset_size)
 
