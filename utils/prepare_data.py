@@ -2,12 +2,15 @@ import torch
 import torch.autograd as autograd
 from torch.nn.utils.rnn import pad_sequence
 
+import string
+
+
 def load_data(data_path):
     data = []
     word = []
     tag = []
 
-    with open(data_path, 'r') as f:
+    with open(data_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
         for line in lines:
             if line != '\n':
@@ -24,7 +27,7 @@ def load_data(data_path):
 def load_data_morphs(data_path):
     morphs = []
 
-    with open(data_path, 'r') as f:
+    with open(data_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
         for line in lines:
             if '\n' in line:
@@ -41,7 +44,7 @@ def load_whole_data(train_path, dev_path, test_path, wiki_path):
 
     data_sources = [train_path, dev_path, test_path, wiki_path]
     for source in data_sources:
-        with open(source, 'r') as f:
+        with open(source, 'r', encoding='utf-8') as f:
             lines = f.readlines()
             for line in lines:
                 if line != '\n':
@@ -53,6 +56,34 @@ def load_whole_data(train_path, dev_path, test_path, wiki_path):
                     tag = []
 
     return data
+
+
+# convert to lower case
+def to_lower(data):
+    lower_data = []
+    for seq in data:
+        sentence = seq[0]
+        tags = seq[1]
+        lower_sent = [s.lower() for s in sentence]
+        lower_data.append((lower_sent, tags))
+    return lower_data
+
+
+# remove punctuation
+def remove_punct(data):
+    new_data = []
+    for seq in data:
+        sentence = seq[0]
+        tags = seq[1]
+
+        clean_sent = []
+        clean_tag = []
+        for s in range(len(sentence)):
+            if sentence[s] not in string.punctuation:
+                clean_sent.append(sentence[s])
+                clean_tag.append(tags[s])
+        new_data.append((clean_sent, clean_tag))
+    return new_data
 
 
 def word_to_morph(data_morphs):
@@ -68,7 +99,6 @@ def word_to_morph(data_morphs):
         for segment in segments:
             word += segment
         word2morph[word] = segments_with_boundaries
-        # word2morph[word] = segments
 
     return word2morph
 
@@ -141,7 +171,8 @@ def morph_to_idx(data, morph2idx, word2morph):
 def tag_to_idx(data, tag2idx):
     res = []
     for seq in range(len(data)):
-        res.append(prepare_target(data[seq][1], tag2idx))
+        tags = [tag.rstrip() for tag in data[seq][1]]
+        res.append(prepare_target(tags, tag2idx))
 
     return res
 
@@ -164,9 +195,9 @@ def encode_data(whole_data):
     char2idx = {}
     idx2char = {}
 
-
     for sent, tags in whole_data:
         for tag in tags:
+            tag = tag.rstrip()
             if tag not in tag2idx:
                 tag2idx[tag] = len(tag2idx) + 1
                 idx2tag[len(idx2tag) + 1] = tag

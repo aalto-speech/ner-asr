@@ -10,7 +10,7 @@ test_data_path = '../../../data/digitoday/digitoday.2015.test.txt'
 wiki_data_path = '../../../data/digitoday/wikipedia.test.txt'
 
 
-whole_data = prepare_data.load_data(whole_data_path)
+whole_data = prepare_data.load_whole_data(train_data_path, dev_data_path, test_data_path, wiki_data_path)
 train_data = prepare_data.load_data(train_data_path)
 dev_data = prepare_data.load_data(dev_data_path)
 test_data = prepare_data.load_data(test_data_path)
@@ -32,7 +32,7 @@ wiki_vocab_list = get_vocab(wiki_data)
 
 
 def write_to_file(file_path, vocab_list):
-    with open(file_path, 'w') as f:
+    with open(file_path, 'w', encoding='utf-8') as f:
         for word in vocab_list:
             f.write(word + '\n')
 

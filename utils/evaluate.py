@@ -9,6 +9,7 @@ def get_predictions(data, model, word_num_layers, char_num_layers, morph_num_lay
     for sent in range(len(data)):
         sentence = data[sent][0].to(device)
         tags = data[sent][1]
+
         chars = data[sent][2]
         morphs = data[sent][3]
         
@@ -80,6 +81,113 @@ def calculate_individual_score(all_predicted, all_true, b_tag_idx, i_tag_idx):
     return precision, recall, f1
 
 
+
+def calculate_individual_score_parliament(all_predicted, all_true, b_tag_idx, i_tag_idx, full_asr_evaluation):
+    precision = []
+    recall = []
+    tp = 0
+    fp = 0
+    fn = 0
+    for seq in range(len(all_true)):
+        for tag in range(len(all_true[seq])):
+            if full_asr_evaluation:
+                if (all_predicted[seq][tag] == b_tag_idx or all_predicted[seq][tag] == i_tag_idx) and (all_true[seq][tag] == b_tag_idx):
+                    tp += 1
+                elif (all_predicted[seq][tag] == b_tag_idx or all_predicted[seq][tag] == i_tag_idx) and (all_true[seq][tag] != b_tag_idx):
+                    fp += 1
+                elif (all_predicted[seq][tag] != b_tag_idx or all_predicted[seq][tag] != i_tag_idx) and (all_true[seq][tag] == b_tag_idx):
+                    fn += 1
+            else:
+                if all_true[seq][tag] == 1:
+                    pass
+                else:
+                    if (all_predicted[seq][tag] == b_tag_idx or all_predicted[seq][tag] == i_tag_idx) and (all_true[seq][tag] == b_tag_idx):
+                        tp += 1
+                    elif (all_predicted[seq][tag] == b_tag_idx or all_predicted[seq][tag] == i_tag_idx) and (all_true[seq][tag] != b_tag_idx):
+                        fp += 1
+                    elif (all_predicted[seq][tag] != b_tag_idx or all_predicted[seq][tag] != i_tag_idx) and (all_true[seq][tag] == b_tag_idx):
+                        fn += 1
+
+
+
+    # calculate precision
+    if tp + fp != 0:
+        precision = tp / (tp + fp)
+    else:
+        precision = 0
+    
+    # calculate recall
+    if tp + fn != 0:
+        recall = tp / (tp + fn)
+    else:
+        recall = 0
+    
+    precision = np.array(precision)
+    recall = np.array(recall)
+
+    # calculate f1
+    if precision.mean() + recall.mean() == 0:
+        f1 = 0.0
+    else:
+        f1 = 2 * (precision.mean() * recall.mean()) / (precision.mean() + recall.mean())
+
+    return precision, recall, f1
+
+
+
+def calculate_individual_score_pressiklubi(all_predicted, all_true, b_tag_idx, i_tag_idx, full_asr_evaluation):
+    precision = []
+    recall = []
+    tp = 0
+    fp = 0
+    fn = 0
+    for seq in range(len(all_true)):
+        for tag in range(len(all_true[seq])):
+            if full_asr_evaluation:
+                if (all_predicted[seq][tag] == b_tag_idx or all_predicted[seq][tag] == i_tag_idx) and (all_true[seq][tag] == b_tag_idx):
+                    tp += 1
+                elif (all_predicted[seq][tag] == b_tag_idx or all_predicted[seq][tag] == i_tag_idx) and (all_true[seq][tag] != b_tag_idx):
+                    fp += 1
+                elif (all_predicted[seq][tag] != b_tag_idx or all_predicted[seq][tag] != i_tag_idx) and (all_true[seq][tag] == b_tag_idx):
+                    fn += 1
+            else:
+                if all_true[seq][tag] == 1:
+                    pass
+                else:
+                    if (all_predicted[seq][tag] == b_tag_idx or all_predicted[seq][tag] == i_tag_idx) and (all_true[seq][tag] == b_tag_idx):
+                        tp += 1
+                    elif (all_predicted[seq][tag] == b_tag_idx or all_predicted[seq][tag] == i_tag_idx) and (all_true[seq][tag] != b_tag_idx):
+                        fp += 1
+                    elif (all_predicted[seq][tag] != b_tag_idx or all_predicted[seq][tag] != i_tag_idx) and (all_true[seq][tag] == b_tag_idx):
+                        fn += 1
+
+
+    # calculate precision
+    if tp + fp != 0:
+        precision = tp / (tp + fp)
+    else:
+        precision = 0
+    
+    # calculate recall
+    if tp + fn != 0:
+        recall = tp / (tp + fn)
+    else:
+        recall = 0
+    
+    precision = np.array(precision)
+    recall = np.array(recall)
+
+    # calculate f1
+    if precision.mean() + recall.mean() == 0:
+        f1 = 0.0
+    else:
+        f1 = 2 * (precision.mean() * recall.mean()) / (precision.mean() + recall.mean())
+
+    return precision, recall, f1
+
+
+
+
 def calculate_average_score(all_predicted, all_true, b_tag_idx, i_tag_idx):
     tp = 0
     fp = 0
@@ -99,6 +207,60 @@ def calculate_average_score(all_predicted, all_true, b_tag_idx, i_tag_idx):
             elif all_predicted[seq][tag] != i_tag_idx and all_true[seq][tag] == i_tag_idx:
                 fn += 1
     
+    return tp, fp, fn
+
+
+def calculate_average_score_parliament(all_predicted, all_true, b_tag_idx, i_tag_idx, full_asr_evaluation):
+    tp = 0
+    fp = 0
+    fn = 0
+    for seq in range(len(all_true)):      
+        for tag in range(len(all_true[seq])):
+            if full_asr_evaluation:
+                if (all_predicted[seq][tag] == b_tag_idx or all_predicted[seq][tag] == i_tag_idx) and (all_true[seq][tag] == b_tag_idx):
+                    tp += 1
+                elif (all_predicted[seq][tag] == b_tag_idx or all_predicted[seq][tag] == i_tag_idx) and (all_true[seq][tag] != b_tag_idx):
+                    fp += 1
+                elif (all_predicted[seq][tag] != b_tag_idx or all_predicted[seq][tag] != i_tag_idx) and (all_true[seq][tag] == b_tag_idx):
+                    fn += 1
+            else:
+                if all_true[seq][tag] == 1:
+                    pass
+                else:
+                    if (all_predicted[seq][tag] == b_tag_idx or all_predicted[seq][tag] == i_tag_idx) and (all_true[seq][tag] == b_tag_idx):
+                        tp += 1
+                    elif (all_predicted[seq][tag] == b_tag_idx or all_predicted[seq][tag] == i_tag_idx) and (all_true[seq][tag] != b_tag_idx):
+                        fp += 1
+                    elif (all_predicted[seq][tag] != b_tag_idx or all_predicted[seq][tag] != i_tag_idx) and (all_true[seq][tag] == b_tag_idx):
+                        fn += 1
+
+    return tp, fp, fn
+
+
+def calculate_average_score_pressiklubi(all_predicted, all_true, b_tag_idx, i_tag_idx, full_asr_evaluation):
+    tp = 0
+    fp = 0
+    fn = 0
+    for seq in range(len(all_true)):      
+        for tag in range(len(all_true[seq])):
+            if full_asr_evaluation:
+                if (all_predicted[seq][tag] == b_tag_idx or all_predicted[seq][tag] == i_tag_idx) and (all_true[seq][tag] == b_tag_idx):
+                    tp += 1
+                elif (all_predicted[seq][tag] == b_tag_idx or all_predicted[seq][tag] == i_tag_idx) and (all_true[seq][tag] != b_tag_idx):
+                    fp += 1
+                elif (all_predicted[seq][tag] != b_tag_idx or all_predicted[seq][tag] != i_tag_idx) and (all_true[seq][tag] == b_tag_idx):
+                    fn += 1
+            else:
+                if all_true[seq][tag] == 1:
+                    pass
+                else:
+                    if (all_predicted[seq][tag] == b_tag_idx or all_predicted[seq][tag] == i_tag_idx) and (all_true[seq][tag] == b_tag_idx):
+                        tp += 1
+                    elif (all_predicted[seq][tag] == b_tag_idx or all_predicted[seq][tag] == i_tag_idx) and (all_true[seq][tag] != b_tag_idx):
+                        fp += 1
+                    elif (all_predicted[seq][tag] != b_tag_idx or all_predicted[seq][tag] != i_tag_idx) and (all_true[seq][tag] == b_tag_idx):
+                        fn += 1
+
     return tp, fp, fn
 
 
@@ -130,6 +292,44 @@ def print_scores(all_predicted, all_true, tag2idx):
 
     micro_avg_precision = (org_tp + per_tp + loc_tp + date_tp + pro_tp + event_tp) / (org_tp + per_tp + loc_tp + date_tp + pro_tp + event_tp + org_fp + per_fp + loc_fp + date_fp + pro_fp + event_fp)
     micro_avg_recall = (org_tp + per_tp + loc_tp + date_tp + pro_tp + event_tp) / (org_tp + per_tp + loc_tp + date_tp + pro_tp + event_tp + org_fn + per_fn + loc_fn + date_fn + pro_fn + event_fn)
+    avg_f1 = 2 * (micro_avg_precision * micro_avg_recall) / (micro_avg_precision + micro_avg_recall)
+    print('micro avg precision: %.4f    micro avg recall: %.4f    avg f1: %.4f' %(micro_avg_precision, micro_avg_recall, avg_f1))
+
+
+def print_scores_parliament(all_predicted, all_true, tag2idx, full_asr_evaluation):
+    per_precision, per_recall, per_f1 = calculate_individual_score_parliament(all_predicted, all_true, tag2idx['B-PER'], tag2idx['I-PER'], full_asr_evaluation)
+    print('per precision: %.4f    per recall: %.4f    per_f1: %.4f' %(per_precision.mean(), per_recall.mean(), per_f1))
+
+    loc_precision, loc_recall, loc_f1 = calculate_individual_score_parliament(all_predicted, all_true, tag2idx['B-LOC'], tag2idx['I-LOC'], full_asr_evaluation)
+    print('loc precision: %.4f    loc recall: %.4f    loc_f1: %.4f' %(loc_precision.mean(), loc_recall.mean(), loc_f1))
+
+
+    per_tp, per_fp, per_fn = calculate_average_score_parliament(all_predicted, all_true, tag2idx['B-PER'], tag2idx['I-PER'], full_asr_evaluation)
+    loc_tp, loc_fp, loc_fn = calculate_average_score_parliament(all_predicted, all_true, tag2idx['B-LOC'], tag2idx['I-LOC'], full_asr_evaluation)
+   
+    micro_avg_precision = (per_tp + loc_tp) / (per_tp + loc_tp + per_fp + loc_fp)
+    micro_avg_recall = (per_tp + loc_tp) / (per_tp + loc_tp + per_fn + loc_fn)
+    avg_f1 = 2 * (micro_avg_precision * micro_avg_recall) / (micro_avg_precision + micro_avg_recall)
+    print('micro avg precision: %.4f    micro avg recall: %.4f    avg f1: %.4f' %(micro_avg_precision, micro_avg_recall, avg_f1))
+
+
+def print_scores_pressiklubi(all_predicted, all_true, tag2idx, full_asr_evaluation):
+    per_precision, per_recall, per_f1 = calculate_individual_score_pressiklubi(all_predicted, all_true, tag2idx['B-PER'], tag2idx['I-PER'], full_asr_evaluation)
+    print('per precision: %.4f    per recall: %.4f    per_f1: %.4f' %(per_precision.mean(), per_recall.mean(), per_f1))
+
+    loc_precision, loc_recall, loc_f1 = calculate_individual_score_pressiklubi(all_predicted, all_true, tag2idx['B-LOC'], tag2idx['I-LOC'], full_asr_evaluation)
+    print('loc precision: %.4f    loc recall: %.4f    loc_f1: %.4f' %(loc_precision.mean(), loc_recall.mean(), loc_f1))
+
+    org_precision, org_recall, org_f1 = calculate_individual_score_pressiklubi(all_predicted, all_true, tag2idx['B-ORG'], tag2idx['I-ORG'], full_asr_evaluation)
+    print('org precision: %.4f    org recall: %.4f    org_f1: %.4f' %(org_precision.mean(), org_recall.mean(), org_f1))
+
+
+    per_tp, per_fp, per_fn = calculate_average_score_pressiklubi(all_predicted, all_true, tag2idx['B-PER'], tag2idx['I-PER'], full_asr_evaluation)
+    loc_tp, loc_fp, loc_fn = calculate_average_score_pressiklubi(all_predicted, all_true, tag2idx['B-LOC'], tag2idx['I-LOC'], full_asr_evaluation)
+    org_tp, org_fp, org_fn = calculate_average_score_pressiklubi(all_predicted, all_true, tag2idx['B-ORG'], tag2idx['I-ORG'], full_asr_evaluation)
+   
+    micro_avg_precision = (per_tp + loc_tp + org_tp) / (per_tp + loc_tp + org_tp + per_fp + loc_fp + org_fp)
+    micro_avg_recall = (per_tp + loc_tp + org_tp) / (per_tp + loc_tp + org_tp + per_fn + loc_fn + org_fn)
     avg_f1 = 2 * (micro_avg_precision * micro_avg_recall) / (micro_avg_precision + micro_avg_recall)
     print('micro avg precision: %.4f    micro avg recall: %.4f    avg f1: %.4f' %(micro_avg_precision, micro_avg_recall, avg_f1))
 
