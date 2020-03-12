@@ -17,4 +17,4 @@ learning_rate = 0.001
 patience = 10
 MAX_SEQ_LENGTH = 1000
 skip_training = True
-full_asr_evaluation = False
+lowercase_model = False
