@@ -1,0 +1,14 @@
+Train and segment commands:
+
+export LC_CTYPE=en_US.UTF-8
+source ~/.bashrc
+
+# jalkapallo - correct in the estonian dataset
+
+morfessor -t vocab/preprocessed_finnish_vocab.txt -d ones -w 0.1 --encoding='utf-8' -S model/morfessor.bin
+morfessor-segment -l model/morfessor_0.1.bin vocab/whole_vocab.txt > segmented/whole_vocab_segmented.txt
+flatcat-train model_0.1.txt -p 100 -w 0.1 -s flatcat_0.1.txt --save-parameters parameters.txt --category-separator ࠾
+flatcat-segment model_0.1.txt --load-parameters parameters.txt --remove-nonmorphemes --category-separator ࠾ -o segmented/whole_vocab_segmented.txt vocab/whole_vocab.txt
+
+morfessor -t vocab/preprocessed_finnish_vocab.txt -d log -w 0.1 --encoding='utf-8' -S model/morfessor_0.1_log.txt
+morfessor-segment -L model/morfessor_0.01_log.txt vocab/whole_vocab.txt > segmented/whole_vocab_segmented_0.01_log.txt
