@@ -2,6 +2,7 @@ import torch
 import torch.autograd as autograd
 from torch.nn.utils.rnn import pad_sequence
 
+import numpy as np
 import string
 
 
@@ -15,7 +16,7 @@ def load_data(data_path):
         for line in lines:
             if line != '\n':
                 word.append(line.split('\t')[0])
-                tag.append(line.split('\t')[1])
+                tag.append(line.split('\t')[1].rstrip())
             else:
                 data.append((word, tag))
                 word = []
@@ -58,34 +59,6 @@ def load_whole_data(train_path, dev_path, test_path, wiki_path):
     return data
 
 
-# convert to lower case
-def to_lower(data):
-    lower_data = []
-    for seq in data:
-        sentence = seq[0]
-        tags = seq[1]
-        lower_sent = [s.lower() for s in sentence]
-        lower_data.append((lower_sent, tags))
-    return lower_data
-
-
-# remove punctuation
-def remove_punct(data):
-    new_data = []
-    for seq in data:
-        sentence = seq[0]
-        tags = seq[1]
-
-        clean_sent = []
-        clean_tag = []
-        for s in range(len(sentence)):
-            if sentence[s] not in string.punctuation:
-                clean_sent.append(sentence[s])
-                clean_tag.append(tags[s])
-        new_data.append((clean_sent, clean_tag))
-    return new_data
-
-
 def word_to_morph(data_morphs):
     word2morph = {}
     word2morph['<start>'] = '<start>'
@@ -122,12 +95,24 @@ def prepare_morph_sequence(word, to_morph, to_idx):
     return autograd.Variable(torch.LongTensor(res))
 
 
-def prepare_sequence(seq, to_ix):
+def prepare_sequence(seq, to_ix, embeddings):
     res = []
     for w in seq:
-        res.append([to_ix[w]])
+        # res.append([to_ix[w]])
+        try:
+            res.append(embeddings[w])
+        except:
+            res.append(np.random.normal(scale=0.6, size=(300, )))
+    res = autograd.Variable(torch.FloatTensor(res))
 
-    return autograd.Variable(torch.LongTensor(res))
+    return res
+
+
+def data_to_idx(data, word2idx, embeddings):
+    res = []
+    for seq in range(len(data)):
+        res.append(prepare_sequence(data[seq][0], word2idx, embeddings))
+    return res
 
 
 def prepare_target(seq, to_ix):
@@ -137,13 +122,6 @@ def prepare_target(seq, to_ix):
 
     return autograd.Variable(torch.LongTensor(res))
 
-
-def data_to_idx(data, word2idx):
-    res = []
-    for seq in range(len(data)):
-        res.append(prepare_sequence(data[seq][0], word2idx))
-
-    return res
 
 
 def char_to_idx(data, char2idx):
@@ -171,8 +149,7 @@ def morph_to_idx(data, morph2idx, word2morph):
 def tag_to_idx(data, tag2idx):
     res = []
     for seq in range(len(data)):
-        tags = [tag.rstrip() for tag in data[seq][1]]
-        res.append(prepare_target(tags, tag2idx))
+        res.append(prepare_target(data[seq][1], tag2idx))
 
     return res
 
@@ -195,9 +172,9 @@ def encode_data(whole_data):
     char2idx = {}
     idx2char = {}
 
+
     for sent, tags in whole_data:
         for tag in tags:
-            tag = tag.rstrip()
             if tag not in tag2idx:
                 tag2idx[tag] = len(tag2idx) + 1
                 idx2tag[len(idx2tag) + 1] = tag
@@ -234,6 +211,33 @@ def encode_data_morphs(morph_data):
 
     return morph2idx, idx2morph
 
+
+# convert to lower case
+def to_lower(data):
+    lower_data = []
+    for seq in data:
+        sentence = seq[0]
+        tags = seq[1]
+        lower_sent = [s.lower() for s in sentence]
+        lower_data.append((lower_sent, tags))
+    return lower_data
+
+
+# remove punctuation
+def remove_punct(data):
+    new_data = []
+    for seq in data:
+        sentence = seq[0]
+        tags = seq[1]
+
+        clean_sent = []
+        clean_tag = []
+        for s in range(len(sentence)):
+            if sentence[s] not in string.punctuation:
+                clean_sent.append(sentence[s])
+                clean_tag.append(tags[s])
+        new_data.append((clean_sent, clean_tag))
+    return new_data
 
 
 # add <start> and <end> tokens
@@ -294,7 +298,7 @@ def pad_subwords(subwords):
 def collate(list_of_samples):
     # sort a list by sequence length
     list_of_samples.sort(key=lambda x: len(x[0]), reverse=True)
-    
+
     input_seqs, output_seqs, char_seqs, morph_seqs = zip(*list_of_samples)
     input_seq_lengths = [len(seq) for seq in input_seqs]
     output_seq_lengths = [len(seq) for seq in output_seqs]
@@ -375,7 +379,6 @@ def collate(list_of_samples):
 
     pad_morph_seqs = torch.stack(pad_morphs)
     pad_morph_seqs = pad_morph_seqs.permute(2, 0, 1)
-    
 
 
     # pad output sequences
