@@ -13,13 +13,9 @@ The pretrained word embeddings can be downloaded from the following link: https:
 
 You need to place the embeddings in the `data/embeddings` directory.
 
-You can download the model weights from the following link: https://drive.google.com/open?id=1eSfSh6Ch8P96bTde5-uSechayfx4oECV
-
-The weights should be placed in a `weights` directory
-
 # Usage
-In order to evaluate the system on the Digitoday dataset, run `main_digitoday.py` script.
-
-In order to evaluate the system on the Parliament dataset, run `main_parliament.py` script. If you want to evaluate it only on the entities that were found by Lingsoft, set the parameter `full_asr_evaluation` to `False` in the `config/config.py` file.
-
-In order to evaluate the system on the Pressiklubi dataset, run `main_pressiklubi.py` script. If you want to evaluate it only on the entities that were found by Lingsoft, set the parameter `full_asr_evaluation` to `False` in the `config/config.py` file.
+Use 'evaluate_document.py' in order to annotate a new document. 
+This script takes two input arguments:
+--input - input file to be evaluated
+--output - path where the output will be stored
+The format of the input document is described in the script
