@@ -14,8 +14,11 @@ The pretrained word embeddings can be downloaded from the following link: https:
 You need to place the embeddings in the `data/embeddings` directory.
 
 # Usage
-Use 'evaluate_document.py' in order to annotate a new document. 
+Use `evaluate_document.py` in order to annotate a new document. 
 This script takes two input arguments:
+
 --input - input file to be evaluated
+
 --output - path where the output will be stored
+
 The format of the input document is described in the script
