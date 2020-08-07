@@ -90,6 +90,7 @@ from argparse import ArgumentParser
 import gensim
 import morfessor
 import pickle
+import fasttext
 
 from model import NERModel
 from config.params import *
@@ -312,8 +313,9 @@ if __name__ == "__main__":
     io = morfessor.MorfessorIO()
 
     print('Loading embeddings...')
-    # embeddings = gensim.models.KeyedVectors.load_word2vec_format('data/embeddings/fin-word2vec.bin', binary=True, limit=100000)
-    embeddings = gensim.models.fasttext.load_facebook_vectors('data/embeddings/cc.fi.300.bin')
+    #embeddings = gensim.models.fasttext.load_facebook_vectors('data/embeddings/cc.fi.300.bin')
+    embeddings = fasttext.load_model('data/embeddings/cc.fi.300.bin')
+
     print('Finished loading embeddings')
 
     # load the morfessor model
@@ -352,9 +354,9 @@ if __name__ == "__main__":
 
     # load the model
     if lowercase_model == False:
-        model.load_state_dict(torch.load('weights/model_upper.pt'))
+        model.load_state_dict(torch.load('weights/model_upper.pt', map_location=torch.device('cpu')))
     else:
-        model.load_state_dict(torch.load('weights/model_lower.pt'))
+        model.load_state_dict(torch.load('weights/model_lower.pt', map_location=torch.device('cpu')))
 
     model.eval()
     batch_size = 1

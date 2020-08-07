@@ -7,6 +7,7 @@ This repository contains a named entity recognition system for Finnish language.
 2. pytorch-crf
 3. gensim
 4. morfessor
+5. fasttext
 
 # Download resources
 The pretrained word embeddings can be downloaded from the following link: https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.fi.300.bin.gz .
